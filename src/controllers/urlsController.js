@@ -42,7 +42,7 @@ export async function getUrlById(req,res){
         if(possibleUrl.rowCount === 0){
             throw new ApiError("Não foi possível encontrar url com esse id.",404);
         }
-        res.status(200).send(possibleUrl.rows);
+        res.status(200).send(possibleUrl.rows[0]);
     }catch(error){
         console.log(error);
 		if(error instanceof ApiError){
