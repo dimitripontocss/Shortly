@@ -52,7 +52,7 @@ export async function signin(req,res){
         if(passwordValidate){
             const data = {
 				email: possibleUser[0].email,
-				userId: possibleUser[0].id
+				id: possibleUser[0].id
 			}
             const token = jwtGenerator(data);
             res.status(200).send(token)
