@@ -120,6 +120,7 @@ COPY public."shortenedUrls" (id, "userId", "shortUrl", url, "visitCount") FROM s
 --
 
 COPY public.users (id, name, email, password) FROM stdin;
+1	Dimitri	dimitri@m.com	$2b$10$gs57SAap83eXzK0lv4LIY.wcAwqHbLkKcjw0EB8ZdUDGX5TOyCsji
 \.
 
 
@@ -134,7 +135,7 @@ SELECT pg_catalog.setval('public."shortenedUrls_id_seq"', 1, false);
 -- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.users_id_seq', 1, false);
+SELECT pg_catalog.setval('public.users_id_seq', 1, true);
 
 
 --
@@ -143,6 +144,14 @@ SELECT pg_catalog.setval('public.users_id_seq', 1, false);
 
 ALTER TABLE ONLY public."shortenedUrls"
     ADD CONSTRAINT "shortenedUrls_pkey" PRIMARY KEY (id);
+
+
+--
+-- Name: shortenedUrls shortenedUrls_shortUrl_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."shortenedUrls"
+    ADD CONSTRAINT "shortenedUrls_shortUrl_key" UNIQUE ("shortUrl");
 
 
 --

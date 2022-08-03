@@ -6,6 +6,7 @@ import {signupSchema,signinSchema} from "../schemas/userSchemas.js";
 
 import ApiError from "../utils/apiError.js"
 import handleError from "../utils/handleError.js"
+import jwtGenerator from "../utils/jwtGenerator.js"
 
 export async function signup(req,res){
     const {name, email, password, confirmPassword} = req.body;
@@ -42,7 +43,22 @@ export async function signin(req,res){
 		if(error){
 			throw new ApiError("Prencha todos os campos corretamente.",422);
 		}
-        res.sendStatus(201);
+        const {rows: possibleUser} = await db.query("SELECT * FROM users WHERE email = $1",[email])
+        if(possibleUser.length === 0){
+            throw new ApiError("Erro na verificação de senha ou email.",401);
+        }
+
+        const passwordValidate = bcrypt.compareSync(password, possibleUser[0].password);
+        if(passwordValidate){
+            const data = {
+				email: possibleUser[0].email,
+				userId: possibleUser[0].id
+			}
+            const token = jwtGenerator(data);
+            res.status(200).send(token)
+        }else{
+            throw new ApiError("Erro na verificação de senha ou email.",401);
+        }
     }catch(error){
         console.log(error);
 		if(error instanceof ApiError){
