@@ -29,7 +29,8 @@ CREATE TABLE public."shortenedUrls" (
     "userId" integer NOT NULL,
     "shortUrl" text NOT NULL,
     url text NOT NULL,
-    "visitCount" integer NOT NULL
+    "visitCount" integer NOT NULL,
+    "createdAt" date DEFAULT now()
 );
 
 
@@ -65,7 +66,8 @@ CREATE TABLE public.users (
     id integer NOT NULL,
     name text NOT NULL,
     email text NOT NULL,
-    password text NOT NULL
+    password text NOT NULL,
+    "createdAt" date DEFAULT now()
 );
 
 
@@ -111,7 +113,7 @@ ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_
 -- Data for Name: shortenedUrls; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public."shortenedUrls" (id, "userId", "shortUrl", url, "visitCount") FROM stdin;
+COPY public."shortenedUrls" (id, "userId", "shortUrl", url, "visitCount", "createdAt") FROM stdin;
 \.
 
 
@@ -119,8 +121,7 @@ COPY public."shortenedUrls" (id, "userId", "shortUrl", url, "visitCount") FROM s
 -- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.users (id, name, email, password) FROM stdin;
-1	Dimitri	dimitri@m.com	$2b$10$gs57SAap83eXzK0lv4LIY.wcAwqHbLkKcjw0EB8ZdUDGX5TOyCsji
+COPY public.users (id, name, email, password, "createdAt") FROM stdin;
 \.
 
 
