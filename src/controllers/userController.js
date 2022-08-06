@@ -1,26 +1,30 @@
 import db from "../database/postgres.js";
 
+import { userRepository } from "../repositories/userRepository.js";
+
 import ApiError from "../utils/apiError.js";
 import handleError from "../utils/handleError.js";
 
 export async function getUserInfo(req,res){
     const {id:userId} = res.locals.data;
     try{
-        const possibleUser = await db.query('SELECT * FROM users WHERE id=$1',[userId]);
+        const possibleUser = await userRepository.selectUserbyId(userId);
         if(possibleUser.rowCount===0){
             throw new ApiError("Não existem usuários com este id.",404);
         }
-        const {rows: userInfo} = await db.query(`SELECT users.id, users.name, SUM("shortenedUrls"."visitCount") as "visitCount" 
-                                         FROM users 
-                                         JOIN "shortenedUrls" 
-                                         ON "shortenedUrls"."userId" = users.id 
-                                         WHERE users.id = $1
-                                         GROUP BY users.id`,[userId]);
+        const {rows: userInfo} = await userRepository.selectUserInfo(userId);
+        console.log(userInfo)
+        if(userInfo.length===0){
+            const user = possibleUser.rows[0];
+            return res.status(200).send({
+                    id: user.id,
+                    name: user.name,
+                    visitCount: 0,
+                    shortenedUrls:[]
+            })
+        }
         
-        const {rows: shortenedUrls} = await db.query(`SELECT id, "shortUrl", url, "visitCount"
-                                         FROM "shortenedUrls"
-                                         WHERE "userId"=$1
-                                         ORDER BY id ASC`,[userId]);
+        const {rows: shortenedUrls} = await userRepository.selectUserUrls(userId);
 
         const {id,name,visitCount} = userInfo[0];
         const sendableInfo = {

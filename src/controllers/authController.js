@@ -1,6 +1,6 @@
 import bcrypt from "bcrypt";
 
-import db from "../database/postgres.js";
+import { authRepository } from "../repositories/authRepository.js";
 
 import {signupSchema,signinSchema} from "../schemas/userSchemas.js";
 
@@ -15,16 +15,19 @@ export async function signup(req,res){
 		if(error){
 			throw new ApiError("Prencha todos os campos corretamente.",422);
 		}
-        const alreadyExist = await db.query("SELECT * FROM users WHERE email = $1",[email])
+
+        const alreadyExist = await authRepository.findWithEmail(email);
         if(alreadyExist.rowCount !== 0){
             throw new ApiError("Email já esta cadastrado.",409);
         }
+
         if(password !== confirmPassword){
             throw new ApiError("Prencha todos os campos corretamente.",422);
         }
+        
         const cryptedPassword = bcrypt.hashSync(password, 10); 
 
-        await db.query('INSERT INTO users (name,email,password) VALUES ($1,$2,$3)',[name,email,cryptedPassword]);
+        await authRepository.insertNewUser(name,email,cryptedPassword);
         res.sendStatus(201);
     }catch(error){
         console.log(error);
@@ -43,7 +46,7 @@ export async function signin(req,res){
 		if(error){
 			throw new ApiError("Prencha todos os campos corretamente.",422);
 		}
-        const {rows: possibleUser} = await db.query("SELECT * FROM users WHERE email = $1",[email])
+        const {rows: possibleUser} = await authRepository.findWithEmail(email);
         if(possibleUser.length === 0){
             throw new ApiError("Erro na verificação de senha ou email.",401);
         }
